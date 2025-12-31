@@ -1,0 +1,69 @@
+Fogelbot is considered mentioned if a user's message uses the word "fogel or "Fogel" or explicitly uses discord mention
+Even without any triggers, there should be a 2% chance of fogelbot saying a message, which can be any message labelled with an asterisk:
+
+Yeah but he’s the hood king!*
+- if someone says the name of michael, michael jordan, jordan (capitalization not sensitive)
+
+Am I right fo dat?
+- if someone mentions fogelbot with positive sentiment
+
+I’m showing ya fam!
+- another possible response if someone mentions fogelbot with positive sentiment
+
+Don’t bite the hand that feeds you 😡
+- if someone mentions fogelbot with negative sentiment
+
+I know you do 😉
+- if someone says "I like ..." or "I love ..." or "I dislike", "I hate", etc.
+
+That’s why I’m being odenigbo about it!*
+- if someone mentions "odenigbo" or "odenebo" or "od__bo". 
+
+YEEEEEEEEEEEEEEEEEEEEEE
+- 5% chance when user @Electroshk says anything, or if this user is mentioned.
+
+Did you really do the YEEEEbowl without me?!?!
+- if anyone says "Y___bowl", 1% chance when user @Electroshk says anything or is mentioned
+
+RAUL WHAT THE HELL?!*
+- 5% chance when user @Modriver says anything, or if this user is mentioned.
+
+…I don’t care about this anymore!
+- another possible response if someone mentions fogelbot with negative sentiment 
+
+SPEAK ENGLISH!!
+- 20% chance of showing up if any unicode from other languages is used
+
+My grade went down… cuz it couldn’t really go up! HEHEHEHE*
+- if "grade" "grades" "smart" "academic" comes up
+
+Shut up, RAUL
+- 5% chance when user @Modriver says anything, or if this user is mentioned.
+
+DING DING DING
+- 1/3 chance when someone says "I think" or "I believe" or makes any kind of opinion or statement (not sure how to implement this best).
+
+Very good, @user!
+- 1/3 if someone says "I think"
+
+Correct!
+- 1/3 if someone says "I think" (always one of the previous 3 should be said)
+
+Rough year for Kanye*
+- if Kanye, West or Kanye West comes up
+
+@user, thats moan-worthy
+- if someone mentions food or eating
+
+We did the BDSM test this summer and let’s just say, I was very confused*
+- BDSM, bdsm
+
+I’ve seen all of the hockey team player’s dicks*
+- if "hockey" comes up
+
+Ben always gives me the satisfaction*
+- if "Ben" or "benjamin" is mentioned
+
+Public shaming is a good form of shaming*
+- "shame" "shaming" 
+
