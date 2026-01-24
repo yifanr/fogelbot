@@ -11,7 +11,7 @@ I’m showing ya fam!
 - another possible response if someone mentions fogelbot with positive sentiment
 
 Don’t bite the hand that feeds you 😡
-- if someone mentions fogelbot with negative sentiment
+- if someone mentions fogelbot with negative sentiment, or 5% chance for any negative sentiment even without mention
 
 I know you do 😉
 - if someone says "I like ..." or "I love ..." or "I dislike", "I hate", etc.
@@ -29,10 +29,13 @@ RAUL WHAT THE HELL?!*
 - 5% chance when user @Modriver says anything, or if this user is mentioned.
 
 …I don’t care about this anymore!
-- another possible response if someone mentions fogelbot with negative sentiment 
+- another possible response if someone mentions fogelbot with negative sentiment, or 5% chance for any negative sentiment even without mention
+
+I will BEAT you!*
+- another possible response if someone mentions fogelbot with a negative sentiment, or 5% chance for any negative sentiment even without mention
 
 SPEAK ENGLISH!!
-- 20% chance of showing up if any unicode from other languages is used
+- 100% chance of showing up if any unicode from other languages is used, with a 5 minute cooldown
 
 My grade went down… cuz it couldn’t really go up! HEHEHEHE*
 - if "grade" "grades" "smart" "academic" comes up

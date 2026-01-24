@@ -2,8 +2,10 @@ import discord
 import random
 import re
 import os
+import time
 from dotenv import load_dotenv
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from lingua import Language, LanguageDetectorBuilder
 
 load_dotenv()
 
@@ -16,6 +18,17 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 analyzer = SentimentIntensityAnalyzer()
+language_detector = LanguageDetectorBuilder.from_all_languages().build()
+
+# Quick reply trigger settings
+QUICK_REPLY_WINDOW = 20  # seconds after bot reply
+QUICK_REPLY_COOLDOWN = 300  # 5 minute cooldown
+SPEAK_ENGLISH_COOLDOWN = 300  # 5 minute cooldown
+
+# Track bot replies and cooldowns per channel
+last_bot_reply_time = {}  # channel_id -> timestamp
+last_quick_reply_trigger = {}  # channel_id -> timestamp
+last_speak_english_trigger = {}  # channel_id -> timestamp
 
 # Random quotes (marked with * in quotes.txt) - 2% chance any message
 RANDOM_QUOTES = [
@@ -40,6 +53,7 @@ POSITIVE_RESPONSES = [
 NEGATIVE_RESPONSES = [
     "Don't bite the hand that feeds you 😡",
     "…I don't care about this anymore!",
+    "I will BEAT you!",
 ]
 
 # "I think" responses
@@ -50,14 +64,15 @@ THINK_RESPONSES = [
 ]
 
 
-def contains_non_latin(text):
-    """Check if text contains non-Latin unicode characters."""
-    for char in text:
-        if ord(char) > 127 and not char in '😡😉':  # Allow some common emoji
-            # Check if it's a letter from another language
-            if char.isalpha():
-                return True
-    return False
+def is_non_english(text):
+    """Check if text is in a non-English language using lingua-py."""
+    # Skip very short texts (less reliable detection)
+    if len(text.strip()) < 3:
+        return False
+    detected = language_detector.detect_language_of(text)
+    if detected is None:
+        return False
+    return detected != Language.ENGLISH
 
 
 def is_fogel_mentioned(message):
@@ -68,6 +83,29 @@ def is_fogel_mentioned(message):
     if client.user in message.mentions:
         return True
     return False
+
+
+def is_quick_reply(message):
+    """Check if message is within 20 seconds of bot's last reply (with 5 min cooldown)."""
+    channel_id = message.channel.id
+    current_time = time.time()
+
+    # Check if bot has replied in this channel recently
+    if channel_id not in last_bot_reply_time:
+        return False
+
+    # Check if within the quick reply window
+    time_since_bot_reply = current_time - last_bot_reply_time[channel_id]
+    if time_since_bot_reply > QUICK_REPLY_WINDOW:
+        return False
+
+    # Check cooldown
+    if channel_id in last_quick_reply_trigger:
+        time_since_last_trigger = current_time - last_quick_reply_trigger[channel_id]
+        if time_since_last_trigger < QUICK_REPLY_COOLDOWN:
+            return False
+
+    return True
 
 
 def user_mentioned_or_author(message, user_id):
@@ -110,6 +148,19 @@ async def on_message(message):
         else:
             # Neutral mention - pick randomly from positive responses
             response = random.choice(POSITIVE_RESPONSES)
+
+    # Quick reply trigger (within 20 seconds of bot reply, 5 min cooldown)
+    elif is_quick_reply(message):
+        sentiment = analyzer.polarity_scores(content)
+        print(f"Quick reply detected! Sentiment: {sentiment['compound']}")  # Debug
+        if sentiment['compound'] >= 0.05:
+            response = random.choice(POSITIVE_RESPONSES)
+        elif sentiment['compound'] <= -0.05:
+            response = random.choice(NEGATIVE_RESPONSES)
+        else:
+            response = random.choice(POSITIVE_RESPONSES)
+        # Update cooldown
+        last_quick_reply_trigger[message.channel.id] = time.time()
 
     # Michael/Jordan/hood/king trigger
     elif re.search(r'\b(michael|jordan|king|prince|hood|ghetto)\b', content_lower):
@@ -156,10 +207,17 @@ async def on_message(message):
         resp = random.choice(THINK_RESPONSES)
         response = resp.format(user=message.author.mention)
 
-    # Non-Latin characters - 20% chance
-    elif contains_non_latin(content):
-        if random.random() < 0.20:
+    # Non-English language - 100% chance with 5 minute cooldown
+    elif is_non_english(content):
+        channel_id = message.channel.id
+        current_time = time.time()
+        can_trigger = True
+        if channel_id in last_speak_english_trigger:
+            if current_time - last_speak_english_trigger[channel_id] < SPEAK_ENGLISH_COOLDOWN:
+                can_trigger = False
+        if can_trigger:
             response = "SPEAK ENGLISH!!"
+            last_speak_english_trigger[channel_id] = current_time
 
     # User-specific triggers
     electroshk_triggered = (ELECTROSHK_ID and user_mentioned_or_author(message, ELECTROSHK_ID)) or re.search(r'\byifan\b', content_lower)
@@ -175,6 +233,12 @@ async def on_message(message):
         if random.random() < 0.05:  # 5% chance
             response = random.choice(["RAUL WHAT THE HELL?!", "Shut up, RAUL"])
 
+    # 5% chance to respond to any negative sentiment (even without Fogel mention)
+    if response is None and random.random() < 0.05:
+        sentiment = analyzer.polarity_scores(content)
+        if sentiment['compound'] <= -0.05:
+            response = random.choice(NEGATIVE_RESPONSES)
+
     # 2% random quote chance (if no other response)
     if response is None and random.random() < 0.02:
         response = random.choice(RANDOM_QUOTES)
@@ -182,6 +246,8 @@ async def on_message(message):
     # Send response if we have one
     if response:
         await message.channel.send(response)
+        # Track bot reply time for quick reply detection
+        last_bot_reply_time[message.channel.id] = time.time()
 
 
 if __name__ == '__main__':
