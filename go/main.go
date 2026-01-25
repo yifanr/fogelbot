@@ -1,7 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fogelbot/bot"
+	"fogelbot/config"
+)
 
 func main() {
-	fmt.Println("Hello, world!")
+	config.Load()
+	
+	fogelBot := bot.New()
+	fogelBot.Run()
 }
