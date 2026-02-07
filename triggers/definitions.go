@@ -2,10 +2,12 @@ package triggers
 
 import (
 	"fogelbot/config"
+	"fogelbot/llm"
 )
 
 // RegisterAll registers all triggers in priority order (first-match-wins).
-func RegisterAll(r *Registry, sentiment SentimentAnalyzer, lang LanguageDetector) {
+// llmClient and factProvider may be nil if LLM is not configured.
+func RegisterAll(r *Registry, sentiment SentimentAnalyzer, lang LanguageDetector, llmClient llm.LLM, factProvider FactProvider) {
 	// 1. Fogel mention (code-driven: complex sentiment + @mention logic)
 	r.Add(&FogelTrigger{})
 
@@ -36,6 +38,11 @@ func RegisterAll(r *Registry, sentiment SentimentAnalyzer, lang LanguageDetector
 	// 6. Random negative (code-driven: probability-first optimization)
 	r.Add(&RandomNegativeTrigger{})
 
-	// 7. Random quotes (DSL)
+	// 7. Generated response (code-driven: 5% LLM-generated response)
+	if llmClient != nil && factProvider != nil {
+		r.Add(NewGeneratedResponseTrigger(llmClient, factProvider))
+	}
+
+	// 8. Random quotes (DSL)
 	r.On("RandomQuote").Probability(0.02).RespondOneOf(RandomQuotes...)
 }

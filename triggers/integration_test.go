@@ -14,7 +14,7 @@ func TestIntegration_PriorityOrdering_FogelWinsOverLoveHate(t *testing.T) {
 	lang := &fakeLanguage{nonEnglish: false}
 
 	r := NewRegistry()
-	RegisterAll(r, sentiment, lang)
+	RegisterAll(r, sentiment, lang, nil, nil)
 
 	// "I love fogel" should match FogelTrigger (priority 1), not LoveHate (priority 3)
 	ctx := newTestContext("I love fogel").
@@ -35,7 +35,7 @@ func TestIntegration_PriorityOrdering_FogelMentionWinsOverKeywords(t *testing.T)
 	lang := &fakeLanguage{nonEnglish: false}
 
 	r := NewRegistry()
-	RegisterAll(r, sentiment, lang)
+	RegisterAll(r, sentiment, lang, nil, nil)
 
 	// "fogel is the king" should match FogelTrigger, not HoodKing
 	ctx := newTestContext("fogel is the king").
@@ -56,7 +56,7 @@ func TestIntegration_NoMatch(t *testing.T) {
 	lang := &fakeLanguage{nonEnglish: false}
 
 	r := NewRegistry()
-	RegisterAll(r, sentiment, lang)
+	RegisterAll(r, sentiment, lang, nil, nil)
 
 	// With high random rolls, nothing probabilistic fires
 	ctx := newTestContext("completely unrelated message xyz").
@@ -134,7 +134,7 @@ func TestIntegration_KeywordMatchesCorrectTrigger(t *testing.T) {
 			lang := &fakeLanguage{nonEnglish: false}
 
 			r := NewRegistry()
-			RegisterAll(r, sentiment, lang)
+			RegisterAll(r, sentiment, lang, nil, nil)
 
 			ctx := newTestContext(tt.input).
 				WithRand(newAlwaysRand(0, 0)).

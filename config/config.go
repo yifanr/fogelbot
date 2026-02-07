@@ -12,6 +12,8 @@ var (
 	DiscordToken string
 	ElectroshkID string
 	ModriverID   string
+	GeminiAPIKey string
+	FactDBPath   string
 )
 
 const (
@@ -35,4 +37,9 @@ func Load() {
 
 	ElectroshkID = os.Getenv("ELECTROSHK_ID")
 	ModriverID = os.Getenv("MODRIVER_ID")
+	GeminiAPIKey = os.Getenv("GEMINI_API_KEY")
+	FactDBPath = os.Getenv("FACT_DB_PATH")
+	if FactDBPath == "" {
+		FactDBPath = "fogelbot.db"
+	}
 }

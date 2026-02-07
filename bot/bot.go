@@ -8,7 +8,9 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"fogelbot/config"
+	"fogelbot/facts"
 	"fogelbot/language"
+	"fogelbot/llm"
 	"fogelbot/sentiment"
 	"fogelbot/state"
 	"fogelbot/triggers"
@@ -20,6 +22,7 @@ type Bot struct {
 	Sentiment       *sentiment.Analyzer
 	Language        *language.Detector
 	TriggerRegistry *triggers.Registry
+	FactCollector   *facts.Collector
 }
 
 func New() *Bot {
@@ -38,7 +41,22 @@ func New() *Bot {
 		TriggerRegistry: triggers.NewRegistry(),
 	}
 
-	triggers.RegisterAll(bot.TriggerRegistry, bot.Sentiment, bot.Language)
+	var llmClient llm.LLM
+	var factProvider triggers.FactProvider
+
+	if config.GeminiAPIKey != "" {
+		gemini := llm.NewGemini(config.GeminiAPIKey)
+		store, err := facts.NewFactStore(config.FactDBPath)
+		if err != nil {
+			log.Fatal("Error opening fact store: ", err)
+		}
+		collector := facts.NewCollector(store, gemini, clock)
+		bot.FactCollector = collector
+		llmClient = gemini
+		factProvider = collector
+	}
+
+	triggers.RegisterAll(bot.TriggerRegistry, bot.Sentiment, bot.Language, llmClient, factProvider)
 
 	dg.AddHandler(bot.OnReady)
 	dg.AddHandler(bot.OnMessage)
@@ -49,6 +67,11 @@ func New() *Bot {
 }
 
 func (b *Bot) Run() {
+	if b.FactCollector != nil {
+		b.FactCollector.Start()
+		defer b.FactCollector.Stop()
+	}
+
 	err := b.Session.Open()
 	if err != nil {
 		log.Fatal("Error opening connection, ", err)

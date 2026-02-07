@@ -16,6 +16,10 @@ func (b *Bot) OnMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	if b.FactCollector != nil {
+		b.FactCollector.Observe(m.Author.ID, m.Author.Username, m.Content)
+	}
+
 	ctx := &triggers.Context{
 		Session:   s,
 		Message:   m,

@@ -27,6 +27,11 @@ type Clock interface {
 	Now() time.Time
 }
 
+// FactProvider retrieves stored facts about a user.
+type FactProvider interface {
+	GetFacts(userID string) ([]string, error)
+}
+
 // Production implementations
 
 type stdRand struct{}

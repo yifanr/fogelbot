@@ -11,7 +11,7 @@ func buildRegistryForTest(clk *fakeClock, cm *state.CooldownManager) *Registry {
 	sentiment := &fakeSentiment{score: 0.0}
 	lang := &fakeLanguage{nonEnglish: false}
 	r := NewRegistry()
-	RegisterAll(r, sentiment, lang)
+	RegisterAll(r, sentiment, lang, nil, nil)
 	return r
 }
 
