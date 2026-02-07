@@ -1,13 +1,13 @@
 module fogelbot
 
-go 1.23
+go 1.21.1
 
 require (
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/grassmudhorses/vader-go v0.0.0-20191126145716-003d5aacdb71
 	github.com/joho/godotenv v1.5.1
 	github.com/pemistahl/lingua-go v1.4.0
-	go.etcd.io/bbolt v1.4.3
+	go.etcd.io/bbolt v1.3.9
 )
 
 require (
