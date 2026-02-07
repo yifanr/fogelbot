@@ -9,7 +9,7 @@ import (
 // llmClient and factProvider may be nil if LLM is not configured.
 func RegisterAll(r *Registry, sentiment SentimentAnalyzer, lang LanguageDetector, llmClient llm.LLM, factProvider FactProvider) {
 	// 1. Fogel mention (code-driven: complex sentiment + @mention logic)
-	r.Add(&FogelTrigger{})
+	r.Add(NewFogelTrigger(llmClient, factProvider))
 
 	// 2. Quick reply (code-driven: stateful bot-reply timestamps)
 	r.Add(&QuickReplyTrigger{})
