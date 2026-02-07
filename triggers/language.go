@@ -1,7 +1,6 @@
 package triggers
 
 import (
-	"time"
 	"fogelbot/config"
 )
 
@@ -17,8 +16,8 @@ func (t *LanguageTrigger) Check(ctx *Context) (string, bool) {
 	}
 
 	channelID := ctx.Message.ChannelID
-	now := time.Now()
-	
+	now := ctx.Clock.Now()
+
 	lastTrigger := ctx.Cooldowns.GetLastSpeakEnglishTrigger(channelID)
 	if !lastTrigger.IsZero() && now.Sub(lastTrigger) < config.SpeakEnglishCooldown {
 		return "", false

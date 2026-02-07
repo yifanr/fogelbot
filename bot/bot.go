@@ -28,38 +28,21 @@ func New() *Bot {
 		log.Fatal("Error creating Discord session, ", err)
 	}
 
+	clock := triggers.RealClock()
+
 	bot := &Bot{
-		Session:   dg,
-		Cooldowns: state.NewCooldownManager(),
-		Sentiment: sentiment.NewAnalyzer(),
-		Language:  language.NewDetector(),
+		Session:         dg,
+		Cooldowns:       state.NewCooldownManager(clock),
+		Sentiment:       sentiment.NewAnalyzer(),
+		Language:        language.NewDetector(),
 		TriggerRegistry: triggers.NewRegistry(),
 	}
 
-	// Register triggers in priority order
-	// 1. Fogel mention
-	bot.TriggerRegistry.Register(&triggers.FogelTrigger{})
-	// 2. Quick reply
-	bot.TriggerRegistry.Register(&triggers.QuickReplyTrigger{})
-	// 3. Keyword triggers
-	for _, t := range triggers.NewKeywordTriggers() {
-		bot.TriggerRegistry.Register(t)
-	}
-	// 4. Language detection
-	bot.TriggerRegistry.Register(&triggers.LanguageTrigger{})
-	// 5. User-specific
-	bot.TriggerRegistry.Register(&triggers.ElectroshkTrigger{})
-	bot.TriggerRegistry.Register(&triggers.ModriverTrigger{})
-	// 6. Random negative
-	bot.TriggerRegistry.Register(&triggers.RandomNegativeTrigger{})
-	// 7. Random quotes
-	bot.TriggerRegistry.Register(&triggers.RandomQuoteTrigger{})
+	triggers.RegisterAll(bot.TriggerRegistry, bot.Sentiment, bot.Language)
 
-	// Add handlers
 	dg.AddHandler(bot.OnReady)
 	dg.AddHandler(bot.OnMessage)
 
-	// Identify intents
 	dg.Identify.Intents = discordgo.IntentsGuildMessages | discordgo.IntentsMessageContent
 
 	return bot

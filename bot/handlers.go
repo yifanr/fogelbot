@@ -12,7 +12,6 @@ func (b *Bot) OnReady(s *discordgo.Session, r *discordgo.Ready) {
 }
 
 func (b *Bot) OnMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
-	// Ignore all messages created by the bot itself
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
@@ -23,6 +22,8 @@ func (b *Bot) OnMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 		Cooldowns: b.Cooldowns,
 		Sentiment: b.Sentiment,
 		Language:  b.Language,
+		Rand:      triggers.StdRand(),
+		Clock:     triggers.RealClock(),
 	}
 
 	response := b.TriggerRegistry.Process(ctx)
@@ -31,8 +32,7 @@ func (b *Bot) OnMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if err != nil {
 			log.Println("Error sending message:", err)
 		} else {
-            // Track bot reply time for quick reply detection
-            b.Cooldowns.SetLastBotReply(m.ChannelID)
-        }
+			b.Cooldowns.SetLastBotReply(m.ChannelID)
+		}
 	}
 }
