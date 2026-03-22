@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  fogelbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fogelbot
+    restart: unless-stopped
+    environment:
+      FACT_DB_PATH: /data/fogelbot.db
+    volumes:
+      - ./.env:/app/.env:ro
+      - fogelbot-data:/data
+
+volumes:
+  fogelbot-data:

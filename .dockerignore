@@ -1,0 +1,17 @@
+.env
+.git
+.gitignore
+
+bin/
+lib/
+lib64
+pyvenv.cfg
+
+fogelbot
+fogelbot-go
+fogelbot.db
+
+CLAUDE.md
+PORTING_PLAN.md
+README.md
+design-docs/

@@ -4,3 +4,11 @@ __pycache__/
 
 # the binary
 fogelbot
+fogelbot-go
+fogelbot.db
+
+# local Python environment artifacts
+bin/
+lib/
+lib64
+pyvenv.cfg

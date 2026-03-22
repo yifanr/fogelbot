@@ -6,7 +6,7 @@ A Discord bot that responds to messages with personality-driven quotes and react
 
 ### Requirements
 
-- Go 1.23+
+- Go 1.21+
 - A Discord bot token
 
 ### Environment Variables
@@ -42,6 +42,20 @@ make test-race     # run with race detector
 ```
 
 No `.env` file or Discord token is needed for tests.
+
+## Docker Compose
+
+The repo includes a `Dockerfile` and `docker-compose.yml` for running the bot as a Compose-managed service.
+
+```sh
+docker compose up --build -d
+```
+
+This setup:
+
+- mounts `./.env` read-only at `/app/.env` so startup matches the current local workflow
+- stores the optional bbolt fact database in a named volume at `/data/fogelbot.db`
+- does not publish any ports, since the bot only makes outbound connections
 
 ## Architecture
 
