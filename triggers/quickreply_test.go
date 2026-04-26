@@ -128,3 +128,46 @@ func TestQuickReply_NegativeSentiment(t *testing.T) {
 	resp := assertMatched(t, trigger, ctx)
 	assertResponseOneOf(t, resp, NegativeResponses)
 }
+
+func TestQuickReply_ProbabilityMiss(t *testing.T) {
+	trigger := &QuickReplyTrigger{}
+	clk := newFakeClock()
+	cm := state.NewCooldownManager(clk)
+
+	cm.SetLastBotReply("channel_1")
+	clk.Advance(5 * time.Second)
+
+	ctx := newTestContext("quick response").
+		WithSentiment(0.5).
+		WithRand(newAlwaysRand(0, quickReplyProbability)).
+		WithClock(clk).
+		WithCooldowns(cm).
+		Build()
+
+	assertNotMatched(t, trigger, ctx)
+}
+
+func TestQuickReply_ProbabilityMissDoesNotConsumeCooldown(t *testing.T) {
+	trigger := &QuickReplyTrigger{}
+	clk := newFakeClock()
+	cm := state.NewCooldownManager(clk)
+
+	cm.SetLastBotReply("channel_1")
+	clk.Advance(5 * time.Second)
+
+	missCtx := newTestContext("quick response").
+		WithSentiment(0.5).
+		WithRand(newAlwaysRand(0, 0.99)).
+		WithClock(clk).
+		WithCooldowns(cm).
+		Build()
+	assertNotMatched(t, trigger, missCtx)
+
+	hitCtx := newTestContext("quick response").
+		WithSentiment(0.5).
+		WithRand(newAlwaysRand(0, 0.0)).
+		WithClock(clk).
+		WithCooldowns(cm).
+		Build()
+	assertMatched(t, trigger, hitCtx)
+}

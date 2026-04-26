@@ -23,6 +23,10 @@ func (t *LanguageTrigger) Check(ctx *Context) (string, bool) {
 		return "", false
 	}
 
+	if ctx.Rand.Float64() >= languageDetectionProbability {
+		return "", false
+	}
+
 	ctx.Cooldowns.SetLastSpeakEnglishTrigger(channelID)
 	return "SPEAK ENGLISH!!", true
 }

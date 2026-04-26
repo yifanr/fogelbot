@@ -72,7 +72,7 @@ func TestFogelTrigger_AtMention_LLMFires(t *testing.T) {
 	trigger := NewFogelTrigger(fl, fp)
 
 	botUser := &discordgo.User{ID: "bot_id"}
-	// Low roll (0.1 < 0.30) -> LLM fires
+	// Low roll (0.1 < 0.15) -> LLM fires
 	ctx := newTestContext("hey bot").
 		WithMentions(botUser).
 		WithRand(newAlwaysRand(0, 0.1)).
@@ -90,7 +90,7 @@ func TestFogelTrigger_AtMention_LLMRollFails(t *testing.T) {
 	trigger := NewFogelTrigger(fl, fp)
 
 	botUser := &discordgo.User{ID: "bot_id"}
-	// High roll (0.5 >= 0.30) -> LLM skipped, canned response
+	// High roll (0.5 >= 0.15) -> LLM skipped, canned response
 	ctx := newTestContext("hey bot").
 		WithMentions(botUser).
 		WithSentiment(0.5).

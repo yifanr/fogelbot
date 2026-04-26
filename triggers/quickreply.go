@@ -28,6 +28,10 @@ func (t *QuickReplyTrigger) Check(ctx *Context) (string, bool) {
 		return "", false
 	}
 
+	if ctx.Rand.Float64() >= quickReplyProbability {
+		return "", false
+	}
+
 	ctx.Cooldowns.SetLastQuickReplyTrigger(channelID)
 
 	score := ctx.Sentiment.Compound(ctx.Message.Content)

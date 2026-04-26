@@ -49,9 +49,13 @@ func TestDSLTriggers_TableDriven(t *testing.T) {
 			cm := state.NewCooldownManager(clk)
 			r := buildRegistryForTest(clk, cm)
 
-			// Use high float (0.99) so probability-gated triggers (user, random) don't fire
+			rand := newFixedRand(nil, []float64{0.99, 0.99})
+			if tt.wantMatch {
+				rand = newAlwaysRand(0, 0.01)
+			}
+
 			ctx := newTestContext(tt.input).
-				WithRand(newAlwaysRand(0, 0.99)).
+				WithRand(rand).
 				WithClock(clk).
 				WithCooldowns(cm).
 				Build()
@@ -80,7 +84,7 @@ func TestDSLTriggers_IThinkResponses(t *testing.T) {
 
 	// With fixedRand index 0, should get first ThinkResponse
 	ctx := newTestContext("i think so").
-		WithRand(newAlwaysRand(0, 0.99)).
+		WithRand(newAlwaysRand(0, 0.01)).
 		WithClock(clk).
 		WithCooldowns(cm).
 		Build()
@@ -96,7 +100,7 @@ func TestDSLTriggers_IThinkResponses(t *testing.T) {
 	r2 := buildRegistryForTest(clk2, cm2)
 
 	ctx2 := newTestContext("i think so").
-		WithRand(newAlwaysRand(1, 0.99)).
+		WithRand(newAlwaysRand(1, 0.01)).
 		WithAuthor("user_123", "TestUser").
 		WithClock(clk2).
 		WithCooldowns(cm2).
@@ -113,9 +117,9 @@ func TestDSLTriggers_UserSpecific_Electroshk(t *testing.T) {
 	cm := state.NewCooldownManager(clk)
 	r := buildRegistryForTest(clk, cm)
 
-	// "yifan" matches fallback regex, low roll -> ElectroshkRare (0.01 threshold)
+	// "yifan" matches fallback regex, low roll -> ElectroshkRare (0.005 threshold)
 	ctx := newTestContext("hey yifan").
-		WithRand(newFixedRand(nil, []float64{0.005})).
+		WithRand(newFixedRand(nil, []float64{0.004})).
 		WithClock(clk).
 		WithCooldowns(cm).
 		Build()
@@ -131,9 +135,9 @@ func TestDSLTriggers_UserSpecific_ElectroshkYEEE(t *testing.T) {
 	cm := state.NewCooldownManager(clk)
 	r := buildRegistryForTest(clk, cm)
 
-	// "yifan" matches, ElectroshkRare misses (roll > 0.01), Electroshk hits (roll < 0.05)
+	// "yifan" matches, ElectroshkRare misses (roll > 0.005), Electroshk hits (roll < 0.025)
 	ctx := newTestContext("hey yifan").
-		WithRand(newFixedRand(nil, []float64{0.02, 0.01})).
+		WithRand(newFixedRand(nil, []float64{0.01, 0.01})).
 		WithClock(clk).
 		WithCooldowns(cm).
 		Build()
@@ -154,7 +158,7 @@ func TestDSLTriggers_Modriver(t *testing.T) {
 	// their `\byifan\b` fallback or empty user ID. So the float64 values go:
 	// - ElectroshkRare: User check fails, no float consumed
 	// - Electroshk: User check fails, no float consumed
-	// - Modriver: User check passes (raul matches fallback), consumes float 0.01 < 0.05 -> fires
+	// - Modriver: User check passes (raul matches fallback), consumes float 0.01 < 0.025 -> fires
 	ctx := newTestContext("hey raul").
 		WithRand(newFixedRand([]int{0}, []float64{0.01})).
 		WithClock(clk).
@@ -176,7 +180,7 @@ func TestDSLTriggers_RandomQuote(t *testing.T) {
 	// - ElectroshkRare, Electroshk, Modriver: user check fails first, no float consumed
 	// - RandomNegative: probability check, consumes float
 	// - RandomQuote: probability check, consumes float
-	// So floats: [0.99 (RandomNeg miss), 0.005 (RandomQuote hit)]
+	// So floats: [0.99 (RandomNeg miss), 0.005 (RandomQuote hit at the 0.01 threshold)]
 	ctx := newTestContext("zzz qqq xyz").
 		WithRand(newFixedRand([]int{0}, []float64{0.99, 0.005})).
 		WithClock(clk).

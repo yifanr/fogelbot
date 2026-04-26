@@ -37,7 +37,7 @@ func TestGeneratedResponseTrigger_ProbabilityGate(t *testing.T) {
 	fp := &fakeFactProvider{facts: []string{"likes Go"}}
 	trigger := NewGeneratedResponseTrigger(fl, fp)
 
-	// High roll (0.99) -> should not fire (0.99 >= 0.05)
+	// High roll (0.99) -> should not fire (0.99 >= 0.025)
 	ctx := newTestContext("hello").
 		WithRand(newAlwaysRand(0, 0.99)).
 		Build()
@@ -53,7 +53,7 @@ func TestGeneratedResponseTrigger_Fires(t *testing.T) {
 	fp := &fakeFactProvider{facts: []string{"likes Go"}}
 	trigger := NewGeneratedResponseTrigger(fl, fp)
 
-	// Low roll (0.01) -> should fire (0.01 < 0.05)
+	// Low roll (0.01) -> should fire (0.01 < 0.025)
 	ctx := newTestContext("hello").
 		WithRand(newAlwaysRand(0, 0.01)).
 		Build()

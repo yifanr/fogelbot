@@ -10,8 +10,6 @@ import (
 	"fogelbot/llm"
 )
 
-const mentionGeneratedProbability = 0.30
-
 type FogelTrigger struct {
 	llm          llm.LLM
 	factProvider FactProvider
@@ -41,7 +39,7 @@ func (t *FogelTrigger) Check(ctx *Context) (string, bool) {
 		return "", false
 	}
 
-	// On direct @mention, 30% chance of LLM-generated response
+	// Direct @mentions can take a low-probability LLM-generated response path.
 	if atMentioned && t.llm != nil && t.factProvider != nil {
 		if ctx.Rand.Float64() < mentionGeneratedProbability {
 			if resp := t.tryGenerate(ctx); resp != "" {

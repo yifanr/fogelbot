@@ -6,7 +6,7 @@ import (
 
 func TestRandomNegative_LowRollNegativeSentiment(t *testing.T) {
 	trigger := &RandomNegativeTrigger{}
-	// Roll 0.01 < 0.05 threshold, negative sentiment
+	// Roll 0.01 < 0.025 threshold, negative sentiment
 	ctx := newTestContext("this is terrible").
 		WithSentiment(-0.8).
 		WithRand(newFixedRand([]int{0}, []float64{0.01})).
@@ -17,7 +17,7 @@ func TestRandomNegative_LowRollNegativeSentiment(t *testing.T) {
 
 func TestRandomNegative_HighRollDoesNotFire(t *testing.T) {
 	trigger := &RandomNegativeTrigger{}
-	// Roll 0.10 >= 0.05 threshold
+	// Roll 0.10 >= 0.025 threshold
 	ctx := newTestContext("this is terrible").
 		WithSentiment(-0.8).
 		WithRand(newFixedRand([]int{0}, []float64{0.10})).
@@ -47,10 +47,10 @@ func TestRandomNegative_NeutralSentiment(t *testing.T) {
 
 func TestRandomNegative_BoundaryRoll(t *testing.T) {
 	trigger := &RandomNegativeTrigger{}
-	// Roll exactly at 0.05 should NOT fire (< 0.05 required)
+	// Roll exactly at 0.025 should NOT fire (< 0.025 required)
 	ctx := newTestContext("bad").
 		WithSentiment(-0.8).
-		WithRand(newFixedRand([]int{0}, []float64{0.05})).
+		WithRand(newFixedRand([]int{0}, []float64{0.025})).
 		Build()
 	assertNotMatched(t, trigger, ctx)
 }

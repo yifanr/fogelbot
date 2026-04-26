@@ -97,3 +97,40 @@ func TestLanguageTrigger_PerChannelIsolation(t *testing.T) {
 		Build()
 	assertMatched(t, trigger, ctx2)
 }
+
+func TestLanguageTrigger_ProbabilityMiss(t *testing.T) {
+	trigger := &LanguageTrigger{}
+	clk := newFakeClock()
+	cm := state.NewCooldownManager(clk)
+
+	ctx := newTestContext("Hola").
+		WithNonEnglish(true).
+		WithRand(newAlwaysRand(0, languageDetectionProbability)).
+		WithClock(clk).
+		WithCooldowns(cm).
+		Build()
+
+	assertNotMatched(t, trigger, ctx)
+}
+
+func TestLanguageTrigger_ProbabilityMissDoesNotConsumeCooldown(t *testing.T) {
+	trigger := &LanguageTrigger{}
+	clk := newFakeClock()
+	cm := state.NewCooldownManager(clk)
+
+	missCtx := newTestContext("Hola").
+		WithNonEnglish(true).
+		WithRand(newAlwaysRand(0, 0.99)).
+		WithClock(clk).
+		WithCooldowns(cm).
+		Build()
+	assertNotMatched(t, trigger, missCtx)
+
+	hitCtx := newTestContext("Hola").
+		WithNonEnglish(true).
+		WithRand(newAlwaysRand(0, 0.0)).
+		WithClock(clk).
+		WithCooldowns(cm).
+		Build()
+	assertMatched(t, trigger, hitCtx)
+}

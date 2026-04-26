@@ -8,9 +8,7 @@ import (
 	"fogelbot/llm"
 )
 
-const generatedResponseProbability = 0.05
-
-// GeneratedResponseTrigger fires with a 5% chance, generating an LLM response using user facts.
+// GeneratedResponseTrigger fires with a low probability, generating an LLM response using user facts.
 type GeneratedResponseTrigger struct {
 	llm          llm.LLM
 	factProvider FactProvider

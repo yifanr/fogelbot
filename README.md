@@ -75,13 +75,13 @@ r.On("Pizza").Match(`\bpizza\b`).Probability(0.10).Respond("Pizza time!")
 All trigger registration lives in `triggers/definitions.go` via `RegisterAll()`, which reads top-to-bottom in priority order:
 
 1. Fogel mention (sentiment-aware responses to "fogel" or @mention)
-2. Quick reply (responds when users reply quickly after the bot)
-3. Keyword triggers (DSL-defined pattern matches)
-4. Language detection (responds to non-English messages)
-5. User-specific triggers (DSL-defined, targeted at specific users)
-6. Random negative (5% chance on negative sentiment messages)
-7. Generated response (5% chance LLM-generated response, if configured)
-8. Random quotes (2% chance of a random quote)
+2. Quick reply (10% chance when users reply quickly after the bot)
+3. Keyword triggers (5% chance on matching DSL-defined patterns)
+4. Language detection (5% chance on non-English messages)
+5. User-specific triggers (DSL-defined, targeted at specific users with 0.5%-2.5% gates)
+6. Random negative (2.5% chance on negative sentiment messages)
+7. Generated response (2.5% chance LLM-generated response, if configured)
+8. Random quotes (1% chance of a random quote)
 
 ### Message Flow
 
@@ -100,7 +100,7 @@ When `GEMINI_API_KEY` is set, the bot collects user messages and uses Gemini 2.5
 
 - **Extract facts** about users from their messages
 - **Compact facts** when they exceed 15 per user (down to 7)
-- **Generate responses** (5% chance) using the bot's persona and known user facts
+- **Generate responses** (2.5% ambient chance, plus a higher-probability branch for direct `@mention`s) using the bot's persona and known user facts
 
 Facts are stored in a local bbolt database. Message buffering flushes on either a size threshold (10 messages) or a time interval (1 minute). All LLM errors are logged and swallowed to avoid affecting core bot functionality.
 
