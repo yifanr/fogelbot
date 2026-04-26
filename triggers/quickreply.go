@@ -1,8 +1,13 @@
 package triggers
 
 import (
+	"strings"
+	"unicode"
+
 	"fogelbot/config"
 )
+
+const quickReplyMinLetters = 8
 
 type QuickReplyTrigger struct{}
 
@@ -10,7 +15,15 @@ func (t *QuickReplyTrigger) Name() string {
 	return "QuickReply"
 }
 
+func (t *QuickReplyTrigger) AllowDuringRecentBotReply() bool {
+	return true
+}
+
 func (t *QuickReplyTrigger) Check(ctx *Context) (string, bool) {
+	if meaningfulLetterCount(ctx.Message.Content) < quickReplyMinLetters {
+		return "", false
+	}
+
 	channelID := ctx.Message.ChannelID
 	lastReply := ctx.Cooldowns.GetLastBotReply(channelID)
 
@@ -19,6 +32,9 @@ func (t *QuickReplyTrigger) Check(ctx *Context) (string, bool) {
 	}
 
 	now := ctx.Clock.Now()
+	if now.Sub(lastReply) < config.QuickReplyMinDelay {
+		return "", false
+	}
 	if now.Sub(lastReply) > config.QuickReplyWindow {
 		return "", false
 	}
@@ -42,4 +58,14 @@ func (t *QuickReplyTrigger) Check(ctx *Context) (string, bool) {
 	} else {
 		return PositiveResponses[ctx.Rand.Intn(len(PositiveResponses))], true
 	}
+}
+
+func meaningfulLetterCount(text string) int {
+	count := 0
+	for _, r := range strings.TrimSpace(text) {
+		if unicode.IsLetter(r) {
+			count++
+		}
+	}
+	return count
 }

@@ -2,9 +2,12 @@ package language
 
 import (
 	"strings"
+	"unicode"
 
 	"github.com/pemistahl/lingua-go"
 )
+
+const minMeaningfulLetters = 8
 
 type Detector struct {
 	detector lingua.LanguageDetector
@@ -33,7 +36,7 @@ func NewDetector() *Detector {
 }
 
 func (d *Detector) IsNonEnglish(text string) bool {
-	if len(strings.TrimSpace(text)) < 3 {
+	if meaningfulLetterCount(text) < minMeaningfulLetters {
 		return false
 	}
 
@@ -43,4 +46,14 @@ func (d *Detector) IsNonEnglish(text string) bool {
 	}
 
 	return lang != lingua.English
+}
+
+func meaningfulLetterCount(text string) int {
+	count := 0
+	for _, r := range strings.TrimSpace(text) {
+		if unicode.IsLetter(r) {
+			count++
+		}
+	}
+	return count
 }

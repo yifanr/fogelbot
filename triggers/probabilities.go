@@ -2,10 +2,11 @@ package triggers
 
 const (
 	mentionGeneratedProbability = 0.15
+	fogelKeywordProbability     = 0.05
 
 	keywordTriggerProbability    = 0.05
-	quickReplyProbability        = 0.10
-	languageDetectionProbability = 0.05
+	quickReplyProbability        = 0.02
+	languageDetectionProbability = 0.01
 
 	electroshkRareProbability = 0.005
 	electroshkProbability     = 0.025

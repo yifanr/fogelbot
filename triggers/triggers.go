@@ -4,8 +4,9 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/bwmarrin/discordgo"
+	"fogelbot/config"
 	"fogelbot/state"
+	"github.com/bwmarrin/discordgo"
 )
 
 // Injectable dependency interfaces
@@ -36,8 +37,8 @@ type FactProvider interface {
 
 type stdRand struct{}
 
-func (stdRand) Intn(n int) int      { return rand.Intn(n) }
-func (stdRand) Float64() float64    { return rand.Float64() }
+func (stdRand) Intn(n int) int   { return rand.Intn(n) }
+func (stdRand) Float64() float64 { return rand.Float64() }
 
 type realClock struct{}
 
@@ -60,9 +61,36 @@ type Context struct {
 	Clock     Clock
 }
 
+func (ctx *Context) DirectlyMentionsBot() bool {
+	if ctx == nil || ctx.Session == nil || ctx.Session.State == nil || ctx.Session.State.User == nil || ctx.Message == nil {
+		return false
+	}
+	for _, user := range ctx.Message.Mentions {
+		if user.ID == ctx.Session.State.User.ID {
+			return true
+		}
+	}
+	return false
+}
+
+func (ctx *Context) RecentBotReplyWithin(d time.Duration) bool {
+	if ctx == nil || ctx.Message == nil || ctx.Cooldowns == nil || ctx.Clock == nil {
+		return false
+	}
+	lastReply := ctx.Cooldowns.GetLastBotReply(ctx.Message.ChannelID)
+	if lastReply.IsZero() {
+		return false
+	}
+	return ctx.Clock.Now().Sub(lastReply) < d
+}
+
 type Trigger interface {
 	Name() string
 	Check(ctx *Context) (string, bool)
+}
+
+type recentReplyExempt interface {
+	AllowDuringRecentBotReply() bool
 }
 
 type Registry struct {
@@ -85,7 +113,14 @@ func (r *Registry) Register(t Trigger) {
 }
 
 func (r *Registry) Process(ctx *Context) string {
+	suppressAmbient := ctx.RecentBotReplyWithin(config.RecentReplyCooldown) && !ctx.DirectlyMentionsBot()
 	for _, t := range r.triggers {
+		if suppressAmbient {
+			exempt, ok := t.(recentReplyExempt)
+			if !ok || !exempt.AllowDuringRecentBotReply() {
+				continue
+			}
+		}
 		if response, matched := t.Check(ctx); matched {
 			return response
 		}

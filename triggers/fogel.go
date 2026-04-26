@@ -39,6 +39,10 @@ func (t *FogelTrigger) Check(ctx *Context) (string, bool) {
 		return "", false
 	}
 
+	if keywordMatch && !atMentioned && ctx.Rand.Float64() >= fogelKeywordProbability {
+		return "", false
+	}
+
 	// Direct @mentions can take a low-probability LLM-generated response path.
 	if atMentioned && t.llm != nil && t.factProvider != nil {
 		if ctx.Rand.Float64() < mentionGeneratedProbability {

@@ -15,6 +15,15 @@ func TestFogelTrigger_MentionByName(t *testing.T) {
 	assertResponseOneOf(t, resp, PositiveResponses)
 }
 
+func TestFogelTrigger_MentionByName_ProbabilityMiss(t *testing.T) {
+	trigger := NewFogelTrigger(nil, nil)
+	ctx := newTestContext("hello fogel").
+		WithSentiment(0.5).
+		WithRand(newAlwaysRand(0, fogelKeywordProbability)).
+		Build()
+	assertNotMatched(t, trigger, ctx)
+}
+
 func TestFogelTrigger_MentionByAtBot_NoLLM(t *testing.T) {
 	trigger := NewFogelTrigger(nil, nil)
 	botUser := &discordgo.User{ID: "bot_id"}
@@ -22,6 +31,18 @@ func TestFogelTrigger_MentionByAtBot_NoLLM(t *testing.T) {
 		WithMentions(botUser).
 		WithSentiment(0.5).
 		WithRand(newAlwaysRand(0, 0)).
+		Build()
+	resp := assertMatched(t, trigger, ctx)
+	assertResponseOneOf(t, resp, PositiveResponses)
+}
+
+func TestFogelTrigger_AtMentionBypassesKeywordProbability(t *testing.T) {
+	trigger := NewFogelTrigger(nil, nil)
+	botUser := &discordgo.User{ID: "bot_id"}
+	ctx := newTestContext("hey there").
+		WithMentions(botUser).
+		WithSentiment(0.5).
+		WithRand(newAlwaysRand(0, 0.99)).
 		Build()
 	resp := assertMatched(t, trigger, ctx)
 	assertResponseOneOf(t, resp, PositiveResponses)

@@ -20,8 +20,10 @@ func TestDetector_SpanishFlagged(t *testing.T) {
 
 func TestDetector_ShortTextNotFlagged(t *testing.T) {
 	d := NewDetector()
-	if d.IsNonEnglish("hi") {
-		t.Error("expected short text to not be flagged")
+	for _, input := range []string{"hi", "test", "???"} {
+		if d.IsNonEnglish(input) {
+			t.Errorf("expected short or low-signal text %q to not be flagged", input)
+		}
 	}
 }
 

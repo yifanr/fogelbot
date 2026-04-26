@@ -18,7 +18,9 @@ var (
 
 const (
 	QuickReplyWindow     = 20 * time.Second
+	QuickReplyMinDelay   = 10 * time.Second
 	QuickReplyCooldown   = 5 * time.Minute
+	RecentReplyCooldown  = 90 * time.Second
 	SpeakEnglishCooldown = 5 * time.Minute
 	SentimentThreshold   = 0.05
 )

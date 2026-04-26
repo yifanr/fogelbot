@@ -9,8 +9,14 @@ func TestConstants(t *testing.T) {
 	if QuickReplyWindow != 20*time.Second {
 		t.Errorf("expected QuickReplyWindow=20s, got %v", QuickReplyWindow)
 	}
+	if QuickReplyMinDelay != 10*time.Second {
+		t.Errorf("expected QuickReplyMinDelay=10s, got %v", QuickReplyMinDelay)
+	}
 	if QuickReplyCooldown != 5*time.Minute {
 		t.Errorf("expected QuickReplyCooldown=5m, got %v", QuickReplyCooldown)
+	}
+	if RecentReplyCooldown != 90*time.Second {
+		t.Errorf("expected RecentReplyCooldown=90s, got %v", RecentReplyCooldown)
 	}
 	if SpeakEnglishCooldown != 5*time.Minute {
 		t.Errorf("expected SpeakEnglishCooldown=5m, got %v", SpeakEnglishCooldown)

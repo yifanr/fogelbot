@@ -3,8 +3,9 @@ package triggers
 import (
 	"testing"
 
-	"github.com/bwmarrin/discordgo"
+	"fogelbot/config"
 	"fogelbot/state"
+	"github.com/bwmarrin/discordgo"
 )
 
 func TestIntegration_PriorityOrdering_FogelWinsOverLoveHate(t *testing.T) {
@@ -69,6 +70,62 @@ func TestIntegration_NoMatch(t *testing.T) {
 	if resp != "" {
 		t.Errorf("expected no match, got %q", resp)
 	}
+}
+
+func TestIntegration_RecentBotReplySuppressesBurst(t *testing.T) {
+	clk := newFakeClock()
+	cm := state.NewCooldownManager(clk)
+	sentiment := &fakeSentiment{score: 0.0}
+	lang := &fakeLanguage{nonEnglish: true}
+
+	r := NewRegistry()
+	RegisterAll(r, sentiment, lang, nil, nil)
+
+	cm.SetLastBotReply("channel_1")
+	clk.Advance(config.QuickReplyMinDelay - 1)
+
+	quickCtx := newTestContext("???").
+		WithRand(newAlwaysRand(0, 0)).
+		WithClock(clk).
+		WithCooldowns(cm).
+		Build()
+	if resp := r.Process(quickCtx); resp != "" {
+		t.Fatalf("expected immediate follow-up to be suppressed, got %q", resp)
+	}
+
+	clk.Advance(1)
+	langCtx := newTestContext("test").
+		WithNonEnglish(true).
+		WithRand(newAlwaysRand(0, 0)).
+		WithClock(clk).
+		WithCooldowns(cm).
+		Build()
+	if resp := r.Process(langCtx); resp != "" {
+		t.Fatalf("expected language trigger during recent-reply cooldown to be suppressed, got %q", resp)
+	}
+}
+
+func TestIntegration_DirectMentionBypassesRecentBotReplySuppression(t *testing.T) {
+	clk := newFakeClock()
+	cm := state.NewCooldownManager(clk)
+	sentiment := &fakeSentiment{score: 0.5}
+	lang := &fakeLanguage{nonEnglish: false}
+	botUser := &discordgo.User{ID: "bot_id"}
+
+	r := NewRegistry()
+	RegisterAll(r, sentiment, lang, nil, nil)
+
+	cm.SetLastBotReply("channel_1")
+
+	ctx := newTestContext("hey bot").
+		WithMentions(botUser).
+		WithRand(newAlwaysRand(0, 0.99)).
+		WithClock(clk).
+		WithCooldowns(cm).
+		Build()
+
+	resp := r.Process(ctx)
+	assertResponseOneOf(t, resp, PositiveResponses)
 }
 
 func TestIntegration_BotIgnoresSelf(t *testing.T) {
