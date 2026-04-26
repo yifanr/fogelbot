@@ -53,8 +53,8 @@ docker compose up --build -d
 
 This setup:
 
-- mounts `./.env` read-only at `/app/.env` so startup matches the current local workflow
-- stores the optional bbolt fact database in a named volume at `/data/fogelbot.db`
+- loads environment variables from `./.env` through Docker Compose
+- stores the optional bbolt fact database in `./fogelbot.db`, mounted at `/data/fogelbot.db`
 - does not publish any ports, since the bot only makes outbound connections
 
 ## Architecture

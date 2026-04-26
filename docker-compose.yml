@@ -7,11 +7,9 @@ services:
       dockerfile: Dockerfile
     container_name: fogelbot
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       FACT_DB_PATH: /data/fogelbot.db
     volumes:
-      - ./.env:/app/.env:ro
-      - fogelbot-data:/data
-
-volumes:
-  fogelbot-data:
+      - ./fogelbot.db:/data/fogelbot.db

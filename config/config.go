@@ -27,7 +27,7 @@ func Load() {
 	// Try loading from .env file, but don't fail if it doesn't exist (prod env might not have it)
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("No .env file found, relying on environment variables")
+		log.Println("Optional .env file was not loaded; using environment variables")
 	}
 
 	DiscordToken = os.Getenv("DISCORD_TOKEN")
